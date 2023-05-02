@@ -1,0 +1,17 @@
+{
+    "manifest_version": 3,
+    "name": "AI Search",
+    "description": "Base Level Extension",
+    "version": "1.0",
+    "background": {
+        "service_worker": "eventPage.js"
+    },
+    "content_scripts": [
+        {
+          "js": ["content.js"],
+          "matches": ["<all_urls>"],
+          "css": ["content.css"]
+        }
+    ],
+    "permissions": ["storage", "activeTab", "contextMenus"]
+  }
