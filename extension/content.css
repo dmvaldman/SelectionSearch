@@ -1,35 +1,55 @@
 .tooltip {
+    font-family: Arial, Helvetica, sans-serif;
     position: absolute;
     display: block;
-    max-height: 400px;
+    width: 660px;
+    height: 450px;
     background-color: white;
     border: 1px solid #ccc;
-    padding: 10px;
-    overflow-y: auto;
+    /* padding: 10px; */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     z-index: 9999;
+    overflow: hidden
+}
+
+.tooltip-wrapper {
+    position: relative;
+    overflow-y: auto;
+    max-height: calc(100% - 20px);
+    width: 100%;
 }
 
 .link-list {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    width: 100%;
 }
 
 .link-item {
     display: flex;
     flex-direction: column;
     gap: 5px;
-    border: 1px solid #ccc;
-    padding: 15px;
-    border-radius: 5px;
+    border-bottom: 2px solid #ccc;
+    padding: 10px;
+    font-weight: normal;
+}
+
+.link-title-date-container {
+    padding: 0;
 }
 
 .link-title {
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
     text-decoration: none;
     color: #333;
+    margin-right: 5px;
+}
+
+.link-domain {
+    font-size: 12px;
+    color: #999;
 }
 
 .link-title:hover {
@@ -39,6 +59,7 @@
 .link-date {
     font-size: 12px;
     color: #999;
+    float: right;
 }
 
 .link-score {
@@ -50,17 +71,118 @@
     font-size: 14px;
     color: #333;
     font-style: italic;
+    line-height: 20px;
+}
+
+.link-tag-container {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.link-tag {
+    background-color: #67b66a;
+    border-radius: 25px;
+    color: white;
+    font-size: 12px;
+    padding: 4px 8px;
+    margin: 5px;
+    text-align: center;
+}
+
+.top-bar {
+    width: 100%;
+    height: 24px;
+    background-color: #a8a8a8;
+    cursor: move;
 }
 
 .close-tooltip {
     position: relative;
-    text-align: right;
+    border: none;
+    font-size: 15px;
+    cursor: pointer;
+    float: right;
+    line-height: 24px;
+    text-align: center;
+    background: transparent;
+    /* border-radius: 50%; */
+    /* width: 24px; */
+    /* height: 24px; */
+    /* background: gray; */
+    /* color: white; */
+}
+
+.close-tooltip:focus {
+    outline: none;
+}
+
+.carousel-container {
+    display: flex;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.carousel-content {
+    width: 100%;
+    font-size: 16px;
+    display: flex;
+    transition: transform 0.3s ease;
+    padding-top: 10px 20px 10px 20px;
+    padding-bottom: 10px;
+    pointer-events: none;
+}
+
+.carousel-item {
+    flex-shrink: 0;
+    width: calc(100% - 60px);
+    margin-right: 30px;
+    margin-left: 30px;
+    text-align: center; /* center the text in the carousel-item */
+    height: min-content;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.carousel-button {
     background-color: transparent;
     border: none;
-    font-size: 12px;
     cursor: pointer;
-  }
+    font-size: 16px;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 2;
+}
 
-  .close-tooltip:focus {
-    outline: none;
+/* flush left position absolute */
+.carousel-left {
+    left: 0px;
+    position: absolute;
+}
+
+/* flush right. position absolute. */
+.carousel-right {
+    right: 0px;
+    position: absolute;
+}
+
+.resize-handle {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 15px;
+    height: 15px;
+    background-color: #ccc;
+    cursor: se-resize;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
   }
