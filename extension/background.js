@@ -8,7 +8,7 @@ const numMetaphorResults = 5
 
 const contextMenuItem = {
     id: "SearchSelect",
-    title: "SearchSelect",
+    title: "Selection Search",
     contexts: ["selection"]
 }
 
