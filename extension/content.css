@@ -148,6 +148,23 @@
     justify-content: center;
 }
 
+/* animation of a dashed circle rotating */
+.loading {
+    animation: spin 4s linear infinite;
+    border: 2px dashed rgb(78, 78, 78);
+    border-radius: 50%;
+    height: 40px;
+    width: 40px;
+    margin: 0 auto;
+}
+
+@keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform:rotate(360deg);
+    }
+}
+
 .carousel-button {
     background-color: transparent;
     border: none;

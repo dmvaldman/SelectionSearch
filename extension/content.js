@@ -27,14 +27,8 @@ function createLinkEl(link){
     linkDomain.classList.add('link-domain');
     linkDomain.textContent = new URL(link.url).hostname + ' | ' + link.dateCreated;
 
-    // put date flush to the right
-    // const linkDate = document.createElement('span');
-    // linkDate.classList.add('link-date');
-    // linkDate.textContent = link.dateCreated;
-
     linkTitleDateContainer.appendChild(linkTitle);
     linkTitleDateContainer.appendChild(linkDomain);
-    // linkTitleDateContainer.appendChild(linkDate);
 
     const linkDescription = document.createElement('span');
     linkDescription.classList.add('link-description');
@@ -52,12 +46,21 @@ function createLinkEl(link){
     carouselContent.classList.add('carousel-content');
     carouselContainer.appendChild(carouselContent);
 
-    const linkScore = document.createElement('span');
-    linkScore.classList.add('link-score');
-    linkScore.textContent = link.score;
-    linkItem.appendChild(linkScore);
+    // score for debugging purposes
+    // const linkScore = document.createElement('span');
+    // linkScore.classList.add('link-score');
+    // linkScore.textContent = link.score;
+    // linkItem.appendChild(linkScore);
 
     return linkItem
+}
+
+function carouselLoadStart(carouselEl){
+    // add loading animation to carousel content
+    const loadingEl = document.createElement('div');
+    loadingEl.classList.add('loading');
+    carouselEl.appendChild(loadingEl);
+    return loadingEl
 }
 
 function createTagEls(linkItemEl, tags){
@@ -135,7 +138,6 @@ function createLinkContainerEl(currEl){
         document.removeEventListener('mousemove', moveTooltip)
     })
 
-    // Function to close the tooltip when the "X" button is clicked
     function closeTooltip() {
         tooltipContainer.remove();
     }
@@ -145,7 +147,6 @@ function createLinkContainerEl(currEl){
 
     tooltipContainer.style.left = `${currEl.clientX}px`;
     tooltipContainer.style.top = `${currEl.clientY}px`;
-
 
     let isResizing = false;
     let initialWidth, initialHeight, initialMouseX, initialMouseY;
@@ -235,19 +236,6 @@ function isValidLink(link){
     return true
 }
 
-async function fetchRerank(text, documents,){
-    // call to cohere
-    const cohere_api_key = 'dXvUkT3DntsiIOhqRU8zDuoEPmE7irjk9z2seDZu'
-
-    const response = await new Promise((resolve) => {
-        // Send a message to the background script to fetch the URL
-        chrome.runtime.sendMessage({ action: 'fetchRerank', text: text, documents: documents }, (response) => {
-            resolve(response);
-        });
-    });
-    return response
-}
-
 async function scrape(link){
     function extractReadableText(doc) {
         // Remove script, style, and noscript elements
@@ -299,55 +287,46 @@ async function summarize(selectedText, webText){
     return response
 }
 
-// Get results from eventPage.js
 chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
-    // get response from metaphor
     if (request.metaphor) {
-        console.log(currEl)
-        console.log(request.metaphor)
-
         const selectedText = request.selectedText
-
         const links = request.metaphor.results
-
         const {tooltipContainer, linkList} = createLinkContainerEl(currEl)
 
-        links.forEach((link) => {
-            if (!isValidLink(link)){
-                console.log('link too low a score')
-                console.log(link)
-                return
+        let validLinks = links.filter(isValidLink)
+
+        for (let i = 0; i < validLinks.length; i++){
+            let link = validLinks[i]
+
+            let linkItem = createLinkEl(link)
+            linkList.appendChild(linkItem);
+
+            // add loading animation
+            let carouselEl = linkItem.querySelector('.carousel-content')
+            let carouselLoadEl = carouselLoadStart(carouselEl)
+
+            // Async load all link content
+            async function load(link, linkItem, carouselLoadEl){
+                const { textContent, images } = await scrape(link)
+                const response = await summarize(selectedText, textContent)
+
+                try {
+                    const textContentSummary = JSON.parse(response)
+                    let descriptionEl = linkItem.querySelector('.link-description')
+                    descriptionEl.textContent = textContentSummary.summary
+                    createTagEls(linkItem, textContentSummary.keywords)
+                    createCarouselEl(linkItem, textContentSummary.passages)
+                    carouselLoadEl.remove()
+                }
+                catch (error) {
+                    console.log(error)
+                }
             }
 
-            linkItem = createLinkEl(link)
-            linkList.appendChild(linkItem);
-        });
+            load(link, linkItem, carouselLoadEl)
+        }
 
         currEl.appendChild(tooltipContainer)
 
-        for (let i = 0; i < links.length; i++){
-            let link = links[i]
-            if (!isValidLink(link)) continue
-            const { textContent, images } = await scrape(link)
-
-            // split text into paragraphs, avoiding empty lines and lines with fewer than 10 words
-            // const paragraphs = textContent.split('\n').filter(line => line.split(' ').length > 10).map((str) => str.trim())
-            // const paragraphsReranked = await fetchRerank(selectedText, paragraphs)
-            // const ranks = JSON.parse(paragraphsReranked.ret).results
-            // const index = ranks[0].index
-
-            const response = await summarize(selectedText, textContent)
-            try {
-                const textContentSummary = JSON.parse(response)
-                let descriptionEl = tooltipContainer.querySelectorAll('.link-description')[i]
-                descriptionEl.textContent = textContentSummary.summary
-                let linkEl = tooltipContainer.querySelectorAll('.link-item')[i]
-                createTagEls(linkEl, textContentSummary.keywords)
-                createCarouselEl(linkEl, textContentSummary.passages)
-            }
-            catch (error) {
-                console.log(error)
-            }
-        }
     }
 })

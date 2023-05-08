@@ -1,17 +1,15 @@
 {
     "manifest_version": 3,
-    "name": "AI Search",
-    "description": "Base Level Extension",
+    "name": "SearchSelect",
+    "description": "Highlight text and perform semantic search",
     "version": "1.0",
     "background": {
-        "service_worker": "eventPage.js"
+        "service_worker": "background.js"
     },
-    "content_scripts": [
-        {
-          "js": ["content.js"],
-          "matches": ["<all_urls>"],
-          "css": ["content.css"]
-        }
-    ],
+    "content_scripts": [{
+        "js": ["content.js"],
+        "matches": ["<all_urls>"],
+        "css": ["content.css"]
+    }],
     "permissions": ["storage", "activeTab", "contextMenus"]
-  }
+}
