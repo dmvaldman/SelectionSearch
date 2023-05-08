@@ -1,6 +1,6 @@
 // Add your API keys here
-const apikey_metaphor =
-const apikey_cohere =
+const apikey_metaphor = "YOUR METAPHOR KEY HERE"
+const apikey_cohere = "YOUR COHERE KEY HERE"
 
 // -----------------------------------------------------------------------------------
 

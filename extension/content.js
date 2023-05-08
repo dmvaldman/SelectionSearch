@@ -145,9 +145,6 @@ function createLinkContainerEl(currEl){
     // Attach the closeTooltipOnClick function to the click event of the "X" button
     closeEl.addEventListener('click', closeTooltip);
 
-    tooltipContainer.style.left = `${currEl.clientX}px`;
-    tooltipContainer.style.top = `${currEl.clientY}px`;
-
     let isResizing = false;
     let initialWidth, initialHeight, initialMouseX, initialMouseY;
 
@@ -326,7 +323,11 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
             load(link, linkItem, carouselLoadEl)
         }
 
-        currEl.appendChild(tooltipContainer)
-
+        // position tooltip below of the current element with some margin
+        let margin = 20
+        const rect = currEl.getBoundingClientRect();
+        tooltipContainer.style.top = (rect.bottom + margin) + "px";
+        tooltipContainer.style.left = (rect.left + margin) + "px";
+        document.body.appendChild(tooltipContainer);
     }
 })
