@@ -1,10 +1,12 @@
 // Add your API keys here
 const apikey_metaphor = "YOUR METAPHOR KEY HERE"
 const apikey_cohere = "YOUR COHERE KEY HERE"
+const apikey_openai = "YOUR OPENAI KEY HERE"
 
 // -----------------------------------------------------------------------------------
 
 const numMetaphorResults = 5
+const min_similarity = .8
 
 const contextMenuItem = {
     id: "SearchSelect",
@@ -15,11 +17,12 @@ const contextMenuItem = {
 chrome.contextMenus.create(contextMenuItem);
 
 async function fetchMetaphor(query, numResults=10){
-    const prompt = "Excerpt: " + query + "\n\n Some great articles illustrating this point:"
+    const prompt = "Excerpt: " + query + "\n\n Some great articles illustrating this:"
 
     const payload = {
         query: prompt,
-        numResults: numResults
+        numResults: numResults,
+        useQueryExpansion: true // undocumented feature to improve query
     }
 
     const options = {
@@ -112,6 +115,129 @@ async function fetchURL(request, sendResponse){
 //     }
 // }
 
+// Function to compute dot product of two vectors
+function dotProduct(vecA, vecB) {
+    let product = 0;
+    for (let i = 0; i < vecA.length; i++) product += vecA[i] * vecB[i];
+    return product;
+}
+
+// Function to compute magnitude (norm) of a vector
+function norm(vec) {
+    let sum = 0;
+    for (let i = 0; i < vec.length; i++) sum += vec[i] ** 2;
+    return Math.sqrt(sum);
+}
+
+// Function to compute cosine similarity of two vectors
+function cosineSimilarity(vecA, vecB) {
+    return dotProduct(vecA, vecB) / (norm(vecA) * norm(vecB));
+}
+
+async function getSnippetsCohere(query, documents){
+    const payload = {
+        query: query,
+        documents: documents,
+        return_documents: false,
+        model: 'rerank-english-v2.0',
+        top_n: 3
+    }
+
+    const url = "https://api.cohere.ai/v1/rerank"
+
+    const response_sentences = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apikey_cohere}`
+        },
+        body: JSON.stringify(payload)
+    });
+
+    const ret_rerank = await response_sentences.text();
+    const results = JSON.parse(ret_rerank).results;
+
+    const passages = [
+        documents[results[0].index],
+        documents[results[1].index],
+        documents[results[2].index]
+    ]
+
+    return passages
+}
+
+async function getSnippetsOpenAI(query, documents){
+    // create embeddings and do semantic search
+    const input = [query, ...documents]
+    const payload = {
+        input: input,
+        model: "text-embedding-ada-002"
+    }
+    const url = "https://api.openai.com/v1/embeddings"
+
+    const embeddings_response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apikey_openai}`
+        },
+        body: JSON.stringify(payload)
+    });
+
+    let embeddings = await embeddings_response.text();
+    embeddings = JSON.parse(embeddings).data;
+
+    let query_embed = embeddings.shift()
+
+    // create a sorted list by similarity to query in the form {index: i, similarity: s}
+    const max_results = 3
+    let similarities = []
+    for (let i = 0; i < embeddings.length; i++) {
+        const similarity = cosineSimilarity(query_embed.embedding, embeddings[i].embedding)
+        if (similarity > min_similarity)
+            similarities.push({index: i, similarity: similarity})
+    }
+
+    // sort by similarity
+    similarities.sort((a, b) => (a.similarity < b.similarity) ? 1 : -1)
+
+    let passages = []
+    for (let i = 0; i < similarities.length; i++) {
+        let similarity = similarities[i]
+        if (i < max_results && similarity.similarity > min_similarity)
+            passages.push(documents[similarity.index])
+    }
+
+    return passages
+}
+
+function convertWebtextToDocs(webtext){
+    const sentences = webtext.split('. ')
+    let documents = []
+    // combine triples of sentences into documents, overlapping with 1 sentence
+    for (let i = 0; i < sentences.length; i += 2) {
+        let doc = sentences.slice(i, i+3).join('. ')
+        documents.push(doc)
+    }
+    return documents
+}
+
+async function getSnippets(query, webtext, method='cohere'){
+    const documents = convertWebtextToDocs(webtext)
+    let results = null
+    switch (method) {
+        case 'cohere':
+            results = await getSnippetsCohere(query, documents)
+            break;
+        case 'openai':
+            results = await getSnippetsOpenAI(query, documents)
+            break;
+    }
+    return results
+}
+
 async function summarizeCohere(request, sendResponse){
     try {
         const payload = {
@@ -137,56 +263,18 @@ async function summarizeCohere(request, sendResponse){
         const summary = JSON.parse(response_summary_text).summary
 
         // split text into sentences to use as the documents
-        const text = request.selectedText
-        const sentences = request.text.split('. ')
-
-        let documents = []
-        // combine pairs of sentences into documents
-        for (let i = 0; i < sentences.length; i += 2) {
-            if (i + 1 < sentences.length) {
-                documents.push(sentences[i] + '. ' + sentences[i + 1])
-            } else {
-                documents.push(sentences[i])
-            }
-        }
-
-        const payload_rerank = {
-            return_documents: false,
-            model: 'rerank-english-v2.0',
-            query: text,
-            documents: documents,
-            top_n: 3
-        }
-
-        const response_sentences = await fetch('https://api.cohere.ai/v1/rerank', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${apikey_cohere}`
-            },
-            body: JSON.stringify(payload_rerank)
-        });
-
-        const ret_rerank = await response_sentences.text();
-        const results = JSON.parse(ret_rerank).results;
-
-        const passages = [
-            documents[results[0].index],
-            documents[results[1].index],
-            documents[results[2].index]
-        ]
+        const query = request.selectedText
+        const webtext = request.text
+        const snippets = await getSnippets(query, webtext, method='openai')
 
         let response = {
             "summary": summary,
-            "passages": passages,
+            "passages": snippets,
             "keywords": []
         }
 
-        let response_str = JSON.stringify(response)
-
         // Send the HTML content back to the content script
-        sendResponse(response_str);
+        sendResponse(JSON.stringify(response));
     } catch (error) {
         // Send an error message back to the content script
         sendResponse({ error: error.message });

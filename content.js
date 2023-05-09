@@ -173,7 +173,7 @@ function createLinkContainerEl(currEl){
     return {tooltipContainer, linkList}
 }
 
-function createCarouselEl(linkItem, quotes){
+function createCarouselEl(linkItem, quotes, images){
     if (quotes.length == 0) return
 
     const carouselContainer = linkItem.querySelector('.carousel-container');
@@ -194,6 +194,13 @@ function createCarouselEl(linkItem, quotes){
         quoteEl.textContent = '"' + quote + '"';
     });
 
+    // images.forEach((image) => {
+    //     const imageEl = document.createElement('img');
+    //     imageEl.classList.add('carousel-item');
+    //     carouselContent.appendChild(imageEl);
+    //     imageEl.src = image;
+    // });
+
     const nextButton = document.createElement('button');
     nextButton.classList.add('carousel-right');
     nextButton.textContent = '❯';
@@ -201,6 +208,7 @@ function createCarouselEl(linkItem, quotes){
 
     let currentItemIndex = 0;
     const totalItems = quotes.length;
+    // const totalItems = quotes.length + images.length;
 
     const updateCarousel = () => {
         carouselContent.style.transform = `translateX(-${currentItemIndex * 100}%)`;
@@ -263,7 +271,8 @@ async function scrape(link){
         const doc = parser.parseFromString(html, 'text/html');
 
         const textContent = extractReadableText(doc);
-        const images = Array.from(doc.images).map(img => img.src)
+        // apply the following query selector 'p img' to get images within <p> tags only
+        const images = Array.from(doc.querySelectorAll('p img')).map(img => img.src)
 
         return { textContent, images };
     }
@@ -312,7 +321,7 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
                     let descriptionEl = linkItem.querySelector('.link-description')
                     descriptionEl.textContent = textContentSummary.summary
                     createTagEls(linkItem, textContentSummary.keywords)
-                    createCarouselEl(linkItem, textContentSummary.passages)
+                    createCarouselEl(linkItem, textContentSummary.passages, images)
                     carouselLoadEl.remove()
                 }
                 catch (error) {
