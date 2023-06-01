@@ -1,4 +1,5 @@
-.tooltip {
+
+.ss {
     font-family: Arial, Helvetica, sans-serif;
     position: absolute;
     display: block;
@@ -12,21 +13,21 @@
     overflow: hidden
 }
 
-.tooltip-wrapper {
+.ss .tooltip-wrapper {
     position: relative;
     overflow-y: auto;
     max-height: calc(100% - 20px);
     width: 100%;
 }
 
-.link-list {
+.ss .link-list {
     display: flex;
     flex-direction: column;
     gap: 15px;
     width: 100%;
 }
 
-.link-item {
+.ss .link-item {
     display: flex;
     flex-direction: column;
     gap: 5px;
@@ -35,11 +36,11 @@
     font-weight: normal;
 }
 
-.link-title-date-container {
+.ss .link-title-date-container {
     padding: 0;
 }
 
-.link-title {
+.ss .link-title {
     font-size: 16px;
     font-weight: bold;
     text-decoration: none;
@@ -47,39 +48,39 @@
     margin-right: 5px;
 }
 
-.link-domain {
+.ss .link-domain {
     font-size: 12px;
     color: #999;
 }
 
-.link-title:hover {
+.ss .link-title:hover {
     text-decoration: underline;
 }
 
-.link-date {
+.ss .link-date {
     font-size: 12px;
     color: #999;
     float: right;
 }
 
-.link-score {
+.ss .link-score {
     font-size: 12px;
     color: #999;
 }
 
-.link-description {
+.ss .link-description {
     font-size: 14px;
     color: #333;
     font-style: italic;
     line-height: 20px;
 }
 
-.link-tag-container {
+.ss .link-tag-container {
     display: flex;
     flex-wrap: wrap;
 }
 
-.link-tag {
+.ss .link-tag {
     background-color: #67b66a;
     border-radius: 25px;
     color: white;
@@ -89,14 +90,14 @@
     text-align: center;
 }
 
-.top-bar {
+.ss .top-bar {
     width: 100%;
     height: 24px;
     background-color: #a8a8a8;
     cursor: move;
 }
 
-.close-tooltip {
+.ss .close-tooltip {
     position: relative;
     border: none;
     font-size: 15px;
@@ -112,11 +113,11 @@
     /* color: white; */
 }
 
-.close-tooltip:focus {
+.ss .close-tooltip:focus {
     outline: none;
 }
 
-.carousel-container {
+.ss .carousel-container {
     display: flex;
     align-items: center;
     overflow: hidden;
@@ -125,7 +126,7 @@
     height: 100%;
 }
 
-.carousel-content {
+.ss .carousel-content {
     width: 100%;
     font-size: 16px;
     display: flex;
@@ -135,7 +136,7 @@
     pointer-events: none;
 }
 
-.carousel-item {
+.ss .carousel-item {
     flex-shrink: 0;
     width: calc(100% - 60px);
     margin-right: 30px;
@@ -149,7 +150,7 @@
 }
 
 /* animation of a dashed circle rotating */
-.loading {
+.ss .loading {
     animation: spin 4s linear infinite;
     border: 2px dashed rgb(78, 78, 78);
     border-radius: 50%;
@@ -158,14 +159,7 @@
     margin: 0 auto;
 }
 
-@keyframes spin {
-    100% {
-        -webkit-transform: rotate(360deg);
-        transform:rotate(360deg);
-    }
-}
-
-.carousel-button {
+.ss .carousel-button {
     background-color: transparent;
     border: none;
     cursor: pointer;
@@ -177,18 +171,18 @@
 }
 
 /* flush left position absolute */
-.carousel-left {
+.ss .carousel-left {
     left: 0px;
     position: absolute;
 }
 
 /* flush right. position absolute. */
-.carousel-right {
+.ss .carousel-right {
     right: 0px;
     position: absolute;
 }
 
-.resize-handle {
+.ss .resize-handle {
     position: absolute;
     right: 0;
     bottom: 0;
@@ -202,4 +196,11 @@
     justify-content: center;
     font-size: 12px;
     font-weight: bold;
-  }
+}
+
+@keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform:rotate(360deg);
+    }
+}

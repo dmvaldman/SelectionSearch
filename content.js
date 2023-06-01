@@ -1,8 +1,12 @@
 const METAPHOR_SCORE_THRESHOLD = 0.16
 let currEl = null
+let clientX = 0
+let clientY = 0
 
 function handleRightClick(event) {
     currEl = event.target; // Get the HTML element that was clicked
+    clientX = event.clientX
+    clientY = event.clientY
 }
 
 // Add the event listener to intercept the right-click event
@@ -83,7 +87,7 @@ function createLinkContainerEl(currEl){
     // create a tooltip over the current element
     // contains draggable bar, wrapper content, and resize bar
     const tooltipContainer = document.createElement('div')
-    tooltipContainer.classList.add('tooltip')
+    tooltipContainer.classList.add('ss')
 
     // create top portion with close bar and draggable bar
     const topBar = document.createElement('div')
@@ -301,6 +305,11 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
 
         let validLinks = links.filter(isValidLink)
 
+        if (validLinks.length == 0){
+            linkList.textContent = 'No references found, Sorry!'
+            return
+        }
+
         for (let i = 0; i < validLinks.length; i++){
             let link = validLinks[i]
 
@@ -333,10 +342,9 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
         }
 
         // position tooltip below of the current element with some margin
-        let margin = 20
-        const rect = currEl.getBoundingClientRect();
-        tooltipContainer.style.top = (rect.bottom + margin) + "px";
-        tooltipContainer.style.left = (rect.left + margin) + "px";
+        let margin = 30
+        tooltipContainer.style.top = (window.scrollY + clientX + margin) + "px";
+        tooltipContainer.style.left = (clientY + margin) + "px";
         document.body.appendChild(tooltipContainer);
     }
 })
