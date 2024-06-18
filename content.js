@@ -29,7 +29,7 @@ function createLinkEl(link){
     // put the URL domain next to it in a span
     const linkDomain = document.createElement('span');
     linkDomain.classList.add('link-domain');
-    linkDomain.textContent = new URL(link.url).hostname + ' | ' + link.dateCreated;
+    linkDomain.textContent = new URL(link.url).hostname + ' | ' + link.publishedDate;
 
     linkTitleDateContainer.appendChild(linkTitle);
     linkTitleDateContainer.appendChild(linkDomain);
@@ -192,9 +192,9 @@ function createCarouselEl(linkItem, quotes, images){
         const quoteEl = document.createElement('div');
         quoteEl.classList.add('carousel-item');
         carouselContent.appendChild(quoteEl);
-        // truncate after 40 words
-        if (quote.split(' ').length > 50)
-            quote = quote.split(' ').slice(0, 50).join(' ') + '...';
+        // truncate after 100 words
+        if (quote.split(' ').length > 100)
+            quote = quote.split(' ').slice(0, 100).join(' ') + '...';
         quoteEl.textContent = '"' + quote + '"';
     });
 
@@ -321,24 +321,35 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
             let carouselLoadEl = carouselLoadStart(carouselEl)
 
             // Async load all link content
-            async function load(link, linkItem, carouselLoadEl){
-                const { textContent, images } = await scrape(link)
-                const response = await summarize(selectedText, textContent)
+            // async function load(link, linkItem, carouselLoadEl){
+            //     const { textContent, images } = await scrape(link)
+            //     const response = await summarize(selectedText, textContent)
 
-                try {
-                    const textContentSummary = JSON.parse(response)
-                    let descriptionEl = linkItem.querySelector('.link-description')
-                    descriptionEl.textContent = textContentSummary.summary
-                    createTagEls(linkItem, textContentSummary.keywords)
-                    createCarouselEl(linkItem, textContentSummary.passages, images)
-                    carouselLoadEl.remove()
-                }
-                catch (error) {
-                    console.log(error)
-                }
-            }
+            //     try {
+            //         const textContentSummary = JSON.parse(response)
+            //         let descriptionEl = linkItem.querySelector('.link-description')
+            //         descriptionEl.textContent = textContentSummary.summary
+            //         createTagEls(linkItem, textContentSummary.keywords)
+            //         createCarouselEl(linkItem, textContentSummary.passages, images)
+            //         carouselLoadEl.remove()
+            //     }
+            //     catch (error) {
+            //         console.log(error)
+            //     }
+            // }
+            // load(link, linkItem, carouselLoadEl)
 
-            load(link, linkItem, carouselLoadEl)
+            // load content in parallel
+            const textContentSummary = link['text']
+            const highlights = link['highlights']
+            const images = []
+
+            // let descriptionEl = linkItem.querySelector('.link-description')
+            // descriptionEl.textContent = textContentSummary
+            // createTagEls(linkItem, textContentSummary.keywords)
+            createCarouselEl(linkItem, highlights, images)
+            carouselLoadEl.remove()
+
         }
 
         // position tooltip below of the current element with some margin

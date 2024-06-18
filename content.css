@@ -129,6 +129,7 @@
 .ss .carousel-content {
     width: 100%;
     font-size: 16px;
+    font-style: italic;
     display: flex;
     transition: transform 0.3s ease;
     padding-top: 10px 20px 10px 20px;
@@ -141,12 +142,12 @@
     width: calc(100% - 60px);
     margin-right: 30px;
     margin-left: 30px;
-    text-align: center; /* center the text in the carousel-item */
+    text-align: justify; /* center the text in the carousel-item */
     height: min-content;
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    justify-content: center;
+    justify-content: space-around;
 }
 
 /* animation of a dashed circle rotating */

@@ -25,7 +25,17 @@ async function fetchMetaphor(query, numResults=10){
     const payload = {
         query: prompt,
         numResults: numResults,
-        useQueryExpansion: true // undocumented feature to improve query
+        useQueryExpansion: true,
+        contents: {
+        text: {
+            maxCharacters: 500,
+            includeHtmlTags: false
+        },
+        highlights: {
+            numSentences: 3,
+            highlightsPerUrl: 3
+        }
+      }
     }
 
     const options = {
@@ -142,7 +152,7 @@ async function getSnippetsCohere(query, documents){
         query: query,
         documents: documents,
         return_documents: false,
-        model: 'rerank-english-v2.0',
+        model: 'rerank-english-v3.0',
         top_n: 3
     }
 
@@ -175,7 +185,7 @@ async function getSnippetsOpenAI(query, documents){
     const input = [query, ...documents]
     const payload = {
         input: input,
-        model: "text-embedding-ada-002"
+        model: "text-embedding-3-small"
     }
     const url = "https://api.openai.com/v1/embeddings"
 
