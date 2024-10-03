@@ -1,10 +1,10 @@
 // Add your API keys here
-// const apikey_metaphor = "YOUR METAPHOR KEY HERE"
-const apikey_metaphor = ''
+// const apikey_exa = "YOUR EXA API KEY HERE"
+const apikey_exa = ''
 
 // -----------------------------------------------------------------------------------
 
-const numMetaphorResults = 5
+const numExaResults = 5
 
 const contextMenuItem = {
     id: "SearchSelect",
@@ -14,7 +14,7 @@ const contextMenuItem = {
 
 chrome.contextMenus.create(contextMenuItem);
 
-async function fetchMetaphor(query, numResults=10){
+async function fetchExa(query, numResults=10){
     const prompt = "Excerpt: " + query + "\n\n Some great articles illustrating this:"
 
     const payload = {
@@ -38,12 +38,12 @@ async function fetchMetaphor(query, numResults=10){
         headers: {
           'accept': 'text/plain',
           'content-type': 'application/json',
-          'x-api-key': apikey_metaphor
+          'x-api-key': apikey_exa
         },
         body: JSON.stringify(payload)
       };
 
-    const result = await fetch('https://api.metaphor.systems/search', options)
+    const result = await fetch('https://api.exa.ai/search', options)
     const json = await result.json()
     return json
 }
@@ -53,35 +53,12 @@ chrome.contextMenus.onClicked.addListener(async function (clickData) {
     if (clickData.menuItemId == "SearchSelect" && selectedText) {
       try {
         // Make a request to the local search server
-        const response = await fetchMetaphor(selectedText, numMetaphorResults);
+        const response = await fetchExa(selectedText, numExaResults);
         // Send the response back to the content script
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        chrome.tabs.sendMessage(tabs[0].id, { metaphor: response, selectedText: selectedText });
+        chrome.tabs.sendMessage(tabs[0].id, { exaResponse: response, selectedText: selectedText });
       } catch (error) {
-        console.error("Error fetching metaphor:", error);
+        console.error("Error fetching from Exa:", error);
       }
     }
   });
-
-
-async function fetchURL(request, sendResponse){
-    try {
-        const response = await fetch(request.url);
-        const html = await response.text();
-        // Send the HTML content back to the content script
-        sendResponse({ html });
-    }
-    catch (error) {
-        // Send an error message back to the content script
-        sendResponse({ error: error.message });
-    }
-}
-
-// background.js
-chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
-    if (request.action === 'fetchUrl'){
-        fetchURL(request, sendResponse)
-        return true
-    }
-    return false
-});

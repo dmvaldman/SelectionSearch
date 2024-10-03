@@ -1,4 +1,4 @@
-const METAPHOR_SCORE_THRESHOLD = 0.16
+const EXA_SCORE_THRESHOLD = 0.16
 
 let currEl = null
 let clientX = 0
@@ -217,7 +217,7 @@ function createCarouselEl(linkItem, quotes, images){
 }
 
 function isValidLink(link){
-    if (link.score < METAPHOR_SCORE_THRESHOLD) return false
+    if (link.score < EXA_SCORE_THRESHOLD) return false
     if (!link.url || !link.title) return false
 
     // make sure url is not from same domain
@@ -229,8 +229,8 @@ function isValidLink(link){
 }
 
 chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
-    if (request.metaphor) {
-        const links = request.metaphor.results
+    if (request.exaResponse) {
+        const links = request.exaResponse.results
         const {tooltipContainer, linkList} = createLinkContainerEl(currEl)
 
         let validLinks = links.filter(isValidLink)

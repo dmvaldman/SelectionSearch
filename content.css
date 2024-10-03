@@ -102,6 +102,7 @@
 .ss .close-tooltip {
     position: relative;
     color: white;
+    background: black;
     border: none;
     font-size: 19px;
     cursor: pointer;
