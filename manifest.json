@@ -11,5 +11,9 @@
         "matches": ["<all_urls>"],
         "css": ["content.css"]
     }],
-    "permissions": ["storage", "activeTab", "contextMenus"]
+    "permissions": ["storage", "activeTab", "contextMenus"],
+    "icons": {
+        "48": "assets/icon_48.png",
+        "128": "assets/icon_128.png"
+    }
 }
