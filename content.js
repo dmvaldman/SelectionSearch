@@ -184,8 +184,10 @@ function createCarouselEl(linkItem, quotes, images){
     const carouselContent = carouselContainer.querySelector('.carousel-content');
 
     const prevButton = document.createElement('button');
+    prevButton.classList.add('carousel-button');
     prevButton.classList.add('carousel-left');
     prevButton.textContent = '❮';
+    prevButton.disabled = true;
     carouselContainer.insertBefore(prevButton, carouselContainer.firstChild);
 
     quotes.forEach((quote) => {
@@ -198,14 +200,8 @@ function createCarouselEl(linkItem, quotes, images){
         quoteEl.textContent = '"' + quote + '"';
     });
 
-    // images.forEach((image) => {
-    //     const imageEl = document.createElement('img');
-    //     imageEl.classList.add('carousel-item');
-    //     carouselContent.appendChild(imageEl);
-    //     imageEl.src = image;
-    // });
-
     const nextButton = document.createElement('button');
+    nextButton.classList.add('carousel-button');
     nextButton.classList.add('carousel-right');
     nextButton.textContent = '❯';
     carouselContainer.appendChild(nextButton);
@@ -221,16 +217,18 @@ function createCarouselEl(linkItem, quotes, images){
     };
 
     prevButton.addEventListener('click', () => {
+        if (currentItemIndex === 0) return;
         currentItemIndex--;
         updateCarousel();
     });
 
     nextButton.addEventListener('click', () => {
+        if (currentItemIndex === totalItems - 1) return;
         currentItemIndex++;
         updateCarousel();
     });
 
-    updateCarousel();
+    return carouselContainer
 }
 
 function isValidLink(link){
@@ -306,8 +304,7 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
         let validLinks = links.filter(isValidLink)
 
         if (validLinks.length == 0){
-            linkList.textContent = 'No references found, Sorry!'
-            return
+            linkList.textContent = 'No references found, Sorry!'                        
         }
 
         for (let i = 0; i < validLinks.length; i++){
@@ -349,13 +346,12 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
             // createTagEls(linkItem, textContentSummary.keywords)
             createCarouselEl(linkItem, highlights, images)
             carouselLoadEl.remove()
-
         }
 
         // position tooltip below of the current element with some margin
         let margin = 30
-        tooltipContainer.style.top = (window.scrollY + clientX + margin) + "px";
-        tooltipContainer.style.left = (clientY + margin) + "px";
-        document.body.appendChild(tooltipContainer);
+        tooltipContainer.style.top = (window.scrollY + clientY + margin) + "px";
+        tooltipContainer.style.left = (clientX + margin) + "px";
+        document.body.prepend(tooltipContainer);
     }
 })
