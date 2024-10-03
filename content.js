@@ -1,4 +1,5 @@
 const METAPHOR_SCORE_THRESHOLD = 0.16
+
 let currEl = null
 let clientX = 0
 let clientY = 0
@@ -65,22 +66,6 @@ function carouselLoadStart(carouselEl){
     loadingEl.classList.add('loading');
     carouselEl.appendChild(loadingEl);
     return loadingEl
-}
-
-function createTagEls(linkItemEl, tags){
-    if (tags.length == 0) return
-
-    const tagContainer = linkItemEl.querySelector('.tag-container');
-
-    // truncate to three tags
-    if (tags.length > 3) tags.splice(3)
-
-    tags.forEach(tag => {
-        const tagEl = document.createElement('span');
-        tagEl.classList.add('link-tag');
-        tagEl.textContent = tag;
-        tagContainer.appendChild(tagEl);
-    });
 }
 
 function createLinkContainerEl(currEl){
@@ -243,110 +228,34 @@ function isValidLink(link){
     return true
 }
 
-async function scrape(link){
-    function extractReadableText(doc) {
-        // Remove script, style, and noscript elements
-        const elementsToRemove = doc.querySelectorAll('script, style, noscript');
-        elementsToRemove.forEach((element) => element.remove());
-
-        // Retrieve the readable text content
-        let readableText = doc.body.textContent.trim();
-
-        // replace multiple tabs, spaces and newlines with single space
-        readableText = readableText.replace(/\s\s+/g, ' ').trim();
-
-        return readableText;
-    }
-
-    async function fetchContent(url) {
-        const response = await new Promise((resolve) => {
-            // Send a message to the background script to fetch the URL
-            chrome.runtime.sendMessage({ action: 'fetchUrl', url: url }, (response) => {
-                resolve(response);
-            });
-        });
-        return response
-    }
-
-    async function parseHtml(html) {
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(html, 'text/html');
-
-        const textContent = extractReadableText(doc);
-        // apply the following query selector 'p img' to get images within <p> tags only
-        const images = Array.from(doc.querySelectorAll('p img')).map(img => img.src)
-
-        return { textContent, images };
-    }
-
-    if (!isValidLink(link)) return
-    const html = await fetchContent(link.url)
-    const { textContent, images } = await parseHtml(html.html)
-    return { textContent, images }
-}
-
-async function summarize(selectedText, webText){
-    const response = await new Promise((resolve) => {
-        // Send a message to the background script to fetch the URL
-        chrome.runtime.sendMessage({ action: 'summarize', text: webText, selectedText: selectedText }, (response) => {
-            resolve(response);
-        });
-    });
-    return response
-}
-
 chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
     if (request.metaphor) {
-        const selectedText = request.selectedText
         const links = request.metaphor.results
         const {tooltipContainer, linkList} = createLinkContainerEl(currEl)
 
         let validLinks = links.filter(isValidLink)
 
-        if (validLinks.length == 0){
-            linkList.textContent = 'No references found, Sorry!'                        
-        }
+        if (validLinks.length == 0)
+            linkList.textContent = 'No references found, Sorry!'
+        else
+            for (let i = 0; i < validLinks.length; i++){
+                let link = validLinks[i]
 
-        for (let i = 0; i < validLinks.length; i++){
-            let link = validLinks[i]
+                let linkItem = createLinkEl(link)
+                linkList.appendChild(linkItem);
 
-            let linkItem = createLinkEl(link)
-            linkList.appendChild(linkItem);
+                // add loading animation
+                let carouselEl = linkItem.querySelector('.carousel-content')
+                let carouselLoadEl = carouselLoadStart(carouselEl)
 
-            // add loading animation
-            let carouselEl = linkItem.querySelector('.carousel-content')
-            let carouselLoadEl = carouselLoadStart(carouselEl)
+                // load content in parallel
+                const textContentSummary = link['text']
+                const highlights = link['highlights']
+                const images = []
 
-            // Async load all link content
-            // async function load(link, linkItem, carouselLoadEl){
-            //     const { textContent, images } = await scrape(link)
-            //     const response = await summarize(selectedText, textContent)
-
-            //     try {
-            //         const textContentSummary = JSON.parse(response)
-            //         let descriptionEl = linkItem.querySelector('.link-description')
-            //         descriptionEl.textContent = textContentSummary.summary
-            //         createTagEls(linkItem, textContentSummary.keywords)
-            //         createCarouselEl(linkItem, textContentSummary.passages, images)
-            //         carouselLoadEl.remove()
-            //     }
-            //     catch (error) {
-            //         console.log(error)
-            //     }
-            // }
-            // load(link, linkItem, carouselLoadEl)
-
-            // load content in parallel
-            const textContentSummary = link['text']
-            const highlights = link['highlights']
-            const images = []
-
-            // let descriptionEl = linkItem.querySelector('.link-description')
-            // descriptionEl.textContent = textContentSummary
-            // createTagEls(linkItem, textContentSummary.keywords)
-            createCarouselEl(linkItem, highlights, images)
-            carouselLoadEl.remove()
-        }
+                createCarouselEl(linkItem, highlights, images)
+                carouselLoadEl.remove()
+            }
 
         // position tooltip below of the current element with some margin
         let margin = 30
