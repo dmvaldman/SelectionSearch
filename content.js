@@ -3,6 +3,7 @@ const EXA_SCORE_THRESHOLD = 0.16
 let currEl = null
 let clientX = 0
 let clientY = 0
+let linkContainerEl = null
 
 function handleRightClick(event) {
     currEl = event.target; // Get the HTML element that was clicked
@@ -12,6 +13,8 @@ function handleRightClick(event) {
 
 // Add the event listener to intercept the right-click event
 document.addEventListener('contextmenu', handleRightClick);
+
+// DOM element constructors
 
 function createLinkEl(link){
     const linkItem = document.createElement('div');
@@ -60,27 +63,19 @@ function createLinkEl(link){
     return linkItem
 }
 
-function carouselLoadStart(carouselEl){
-    // add loading animation to carousel content
-    const loadingEl = document.createElement('div');
-    loadingEl.classList.add('loading');
-    carouselEl.appendChild(loadingEl);
-    return loadingEl
-}
-
 function createLinkContainerEl(currEl){
     // create a tooltip over the current element
     // contains draggable bar, wrapper content, and resize bar
-    const tooltipContainer = document.createElement('div')
-    tooltipContainer.classList.add('ss')
+    const linkContainerEl = document.createElement('div')
+    linkContainerEl.classList.add('ss')
 
     // create top portion with close bar and draggable bar
     const topBar = document.createElement('div')
     topBar.classList.add('top-bar')
 
     // contains the content of the tooltip
-    const tooltipContainerWrapper = document.createElement('div')
-    tooltipContainerWrapper.classList.add('tooltip-wrapper')
+    const linkContainerElWrapper = document.createElement('div')
+    linkContainerElWrapper.classList.add('tooltip-wrapper')
 
     // add resize div
     const resizeHandle = document.createElement('div')
@@ -92,13 +87,13 @@ function createLinkContainerEl(currEl){
     closeEl.textContent = '×'
 
     topBar.appendChild(closeEl)
-    tooltipContainer.appendChild(topBar)
-    tooltipContainer.appendChild(tooltipContainerWrapper)
-    tooltipContainer.appendChild(resizeHandle)
+    linkContainerEl.appendChild(topBar)
+    linkContainerEl.appendChild(linkContainerElWrapper)
+    linkContainerEl.appendChild(resizeHandle)
 
     const linkList = document.createElement('div')
     linkList.classList.add('link-list')
-    tooltipContainerWrapper.appendChild(linkList)
+    linkContainerElWrapper.appendChild(linkList)
 
     let mousePosition = {
         x: 0,
@@ -108,10 +103,10 @@ function createLinkContainerEl(currEl){
     function moveTooltip(e){
         const dx = e.clientX - mousePosition.x
         const dy = e.clientY - mousePosition.y
-        const left = parseInt(window.getComputedStyle(tooltipContainer).left)
-        const top = parseInt(window.getComputedStyle(tooltipContainer).top)
-        tooltipContainer.style.left = `${left + dx}px`
-        tooltipContainer.style.top = `${top + dy}px`
+        const left = parseInt(window.getComputedStyle(linkContainerEl).left)
+        const top = parseInt(window.getComputedStyle(linkContainerEl).top)
+        linkContainerEl.style.left = `${left + dx}px`
+        linkContainerEl.style.top = `${top + dy}px`
         mousePosition.x = e.clientX
         mousePosition.y = e.clientY
     }
@@ -128,7 +123,7 @@ function createLinkContainerEl(currEl){
     })
 
     function closeTooltip() {
-        tooltipContainer.remove();
+        linkContainerEl.remove();
     }
 
     // Attach the closeTooltipOnClick function to the click event of the "X" button
@@ -139,8 +134,8 @@ function createLinkContainerEl(currEl){
 
     resizeHandle.addEventListener("mousedown", (e) => {
         isResizing = true;
-        initialWidth = tooltipContainer.offsetWidth;
-        initialHeight = tooltipContainer.offsetHeight;
+        initialWidth = linkContainerEl.offsetWidth;
+        initialHeight = linkContainerEl.offsetHeight;
         initialMouseX = e.clientX;
         initialMouseY = e.clientY;
     });
@@ -151,15 +146,15 @@ function createLinkContainerEl(currEl){
         const newWidth = initialWidth + (e.clientX - initialMouseX);
         const newHeight = initialHeight + (e.clientY - initialMouseY);
 
-        tooltipContainer.style.width = newWidth + "px";
-        tooltipContainer.style.height = newHeight + "px";
+        linkContainerEl.style.width = newWidth + "px";
+        linkContainerEl.style.height = newHeight + "px";
     });
 
     window.addEventListener("mouseup", () => {
         isResizing = false;
     });
 
-    return {tooltipContainer, linkList}
+    return linkContainerEl
 }
 
 function createCarouselEl(linkItem, quotes, images){
@@ -172,7 +167,6 @@ function createCarouselEl(linkItem, quotes, images){
     prevButton.classList.add('carousel-button');
     prevButton.classList.add('carousel-left');
     prevButton.textContent = '❮';
-    prevButton.disabled = true;
     carouselContainer.insertBefore(prevButton, carouselContainer.firstChild);
 
     quotes.forEach((quote) => {
@@ -213,7 +207,17 @@ function createCarouselEl(linkItem, quotes, images){
         updateCarousel();
     });
 
+    updateCarousel()
+
     return carouselContainer
+}
+
+function loadAnimation(el){
+    // add loading animation to element
+    const loadingEl = document.createElement('div');
+    loadingEl.classList.add('loading');
+    el.appendChild(loadingEl);
+    return loadingEl
 }
 
 function isValidLink(link){
@@ -228,25 +232,27 @@ function isValidLink(link){
     return true
 }
 
+// Extension message handling
 chrome.runtime.onMessage.addListener(async function(request, sender, sendResponse) {
     if (request.exaResponse) {
+        // executed on response from Exa
         const links = request.exaResponse.results
-        const {tooltipContainer, linkList} = createLinkContainerEl(currEl)
+
+        const loadEl = linkContainerEl.querySelector('.loading')
+        const linkList = linkContainerEl.querySelector('.link-list')
+
+        loadEl.remove()
 
         let validLinks = links.filter(isValidLink)
 
         if (validLinks.length == 0)
             linkList.textContent = 'No references found, Sorry!'
-        else
+        else {
             for (let i = 0; i < validLinks.length; i++){
                 let link = validLinks[i]
 
                 let linkItem = createLinkEl(link)
                 linkList.appendChild(linkItem);
-
-                // add loading animation
-                let carouselEl = linkItem.querySelector('.carousel-content')
-                let carouselLoadEl = carouselLoadStart(carouselEl)
 
                 // load content in parallel
                 const textContentSummary = link['text']
@@ -254,13 +260,21 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
                 const images = []
 
                 createCarouselEl(linkItem, highlights, images)
-                carouselLoadEl.remove()
             }
+        }
+    }
+    else if (request.searchSelected){
+        // executed on selection of extension from contextmenu
+
+        // create tooltip container
+        linkContainerEl = createLinkContainerEl(currEl)
 
         // position tooltip below of the current element with some margin
         let margin = 30
-        tooltipContainer.style.top = (window.scrollY + clientY + margin) + "px";
-        tooltipContainer.style.left = (clientX + margin) + "px";
-        document.body.prepend(tooltipContainer);
+        linkContainerEl.style.top = (window.scrollY + clientY + margin) + "px";
+        linkContainerEl.style.left = (clientX + margin) + "px";
+        loadEl = loadAnimation(linkContainerEl)
+
+        document.body.prepend(linkContainerEl);
     }
 })

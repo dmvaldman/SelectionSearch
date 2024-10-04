@@ -130,6 +130,7 @@
     position: relative;
     width: 100%;
     height: 100%;
+    margin-bottom: 10px;
 }
 
 .ss .carousel-content {
@@ -137,7 +138,6 @@
     display: flex;
     transition: transform 0.3s ease;
     padding-top: 10px 20px 10px 20px;
-    padding-bottom: 10px;
     pointer-events: none;
 }
 
@@ -159,12 +159,19 @@
 
 /* animation of a dashed circle rotating */
 .ss .loading {
-    animation: spin 4s linear infinite;
-    border: 2px dashed rgb(78, 78, 78);
+    border: 4px dashed rgb(78, 78, 78);
     border-radius: 50%;
-    height: 40px;
-    width: 40px;
-    margin: 0 auto;
+    height: 50px;
+    width: 50px;
+    /* vertically/horizontally center relative to parent element*/
+    position: relative;
+    top: 50%;
+    left: 50%;
+    margin-top: -50px;
+    margin-left: -25px;
+
+    /* spin animation */
+    animation: spin 4s linear infinite;
 }
 
 .ss .carousel-button {

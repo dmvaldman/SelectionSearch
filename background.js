@@ -52,11 +52,15 @@ chrome.contextMenus.onClicked.addListener(async function (clickData) {
     const selectedText = clickData.selectionText;
     if (clickData.menuItemId == "SearchSelect" && selectedText) {
       try {
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        const tabId = tabs[0].id
+        // Send response to start the loading animation
+        chrome.tabs.sendMessage(tabId, { searchSelected: true, selectedText: selectedText });
+
         // Make a request to the local search server
         const response = await fetchExa(selectedText, numExaResults);
         // Send the response back to the content script
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        chrome.tabs.sendMessage(tabs[0].id, { exaResponse: response, selectedText: selectedText });
+        chrome.tabs.sendMessage(tabId, { exaResponse: response, selectedText: selectedText });
       } catch (error) {
         console.error("Error fetching from Exa:", error);
       }
