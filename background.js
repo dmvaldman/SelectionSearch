@@ -1,6 +1,6 @@
 // Add your API keys here
 // const apikey_exa = "YOUR EXA API KEY HERE"
-const apikey_exa = ''
+const apikey_exa = '79c84cb7-8f8c-446e-a819-a9419ea29e46'
 
 // -----------------------------------------------------------------------------------
 
@@ -8,7 +8,7 @@ const numExaResults = 5
 
 const contextMenuItem = {
     id: "SearchSelect",
-    title: "Selection Search",
+    title: "Exa Search",
     contexts: ["selection"]
 }
 

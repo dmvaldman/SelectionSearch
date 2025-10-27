@@ -14,6 +14,14 @@ function handleRightClick(event) {
 // Add the event listener to intercept the right-click event
 document.addEventListener('contextmenu', handleRightClick);
 
+function iso2date(isoDate) {
+    if (!isoDate) return '';
+    const date = new Date(isoDate);
+    if (isNaN(date.getTime())) return '';
+    const formattedDate = `${(date.getMonth() + 1).toString().padStart(2, '0')}-${date.getDate().toString().padStart(2, '0')}-${date.getFullYear().toString().slice(2)}`;
+    return formattedDate;
+}
+
 // DOM element constructors
 
 function createLinkEl(link){
@@ -33,7 +41,7 @@ function createLinkEl(link){
     // put the URL domain next to it in a span
     const linkDomain = document.createElement('span');
     linkDomain.classList.add('link-domain');
-    linkDomain.textContent = new URL(link.url).hostname + ' | ' + link.publishedDate;
+    linkDomain.textContent = new URL(link.url).hostname + ' | ' + iso2date(link.publishedDate);
 
     linkTitleDateContainer.appendChild(linkTitle);
     linkTitleDateContainer.appendChild(linkDomain);
