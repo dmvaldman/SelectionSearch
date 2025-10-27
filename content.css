@@ -13,6 +13,7 @@
 }
 
 .ss .tooltip-wrapper {
+    color: black;
     position: relative;
     overflow-y: auto;
     max-height: calc(100% - 20px);
@@ -134,6 +135,7 @@
 }
 
 .ss .carousel-content {
+    color: black;
     width: 100%;
     display: flex;
     transition: transform 0.3s ease;
