@@ -1,20 +1,28 @@
-// Add your API keys here
-// const apikey_exa = "YOUR EXA API KEY HERE"
-const apikey_exa = '79c84cb7-8f8c-446e-a819-a9419ea29e46'
-
 // -----------------------------------------------------------------------------------
 
 const numExaResults = 5
+const API_KEY_STORAGE_KEY = 'exa_api_key'
 
 const contextMenuItem = {
     id: "SearchSelect",
-    title: "Search Select",
+    title: "Exa Search",
     contexts: ["selection"]
 }
 
 chrome.contextMenus.create(contextMenuItem);
 
+async function getApiKey() {
+    const result = await chrome.storage.local.get([API_KEY_STORAGE_KEY]);
+    return result[API_KEY_STORAGE_KEY];
+}
+
 async function fetchExa(query, numResults=10){
+    const apikey_exa = await getApiKey();
+
+    if (!apikey_exa) {
+        throw new Error('No API key found. Please set your Exa API key by clicking the extension icon.');
+    }
+
     const prompt = "Excerpt: " + query + "\n\n Some great articles illustrating this:"
 
     const payload = {
@@ -63,6 +71,13 @@ chrome.contextMenus.onClicked.addListener(async function (clickData) {
         chrome.tabs.sendMessage(tabId, { exaResponse: response, selectedText: selectedText });
       } catch (error) {
         console.error("Error fetching from Exa:", error);
+        // Send error message to content script
+        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+        const tabId = tabs[0].id;
+        chrome.tabs.sendMessage(tabId, {
+          exaError: error.message,
+          selectedText: selectedText
+        });
       }
     }
   });

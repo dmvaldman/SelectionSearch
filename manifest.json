@@ -12,6 +12,13 @@
         "css": ["content.css"]
     }],
     "permissions": ["storage", "activeTab", "contextMenus"],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "48": "assets/icon_48.png",
+            "128": "assets/icon_128.png"
+        }
+    },
     "icons": {
         "48": "assets/icon_48.png",
         "128": "assets/icon_128.png"

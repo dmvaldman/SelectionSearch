@@ -5,7 +5,7 @@
     width: 660px;
     height: 450px;
     background-color: #eee;
-    border: 1px solid #ccc;
+    border: 1px solid black;
     /* padding: 10px; */
     box-shadow: 2px 2px 5px 1px rgba(0, 0, 0, 0.5);
     z-index: 9999;
@@ -17,6 +17,7 @@
     font-size: 14px;
     font-weight: normal;
     line-height: 1.4;
+    box-sizing: border-box;
 }
 
 .ss .tooltip-wrapper {
@@ -112,12 +113,12 @@
 .ss .close-tooltip {
     position: relative;
     color: white;
-    background: black;
+    background: none;
     border: none;
-    font-size: 19px;
+    font-size: 22px;
     cursor: pointer;
     float: right;
-    line-height: 24px;
+    line-height: 32px;
     margin: 4px;
     line-height: 24px;
     width: 24px;

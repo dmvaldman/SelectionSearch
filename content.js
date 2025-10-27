@@ -271,6 +271,19 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
             }
         }
     }
+    else if (request.exaError) {
+        // executed on error from Exa API
+        const loadEl = linkContainerEl.querySelector('.loading')
+        const linkList = linkContainerEl.querySelector('.link-list')
+
+        loadEl.remove()
+        linkList.innerHTML = `
+            <div style="text-align: center; padding: 20px; color: red;">
+                <p style="font-weight: bold; margin-bottom: 10px;">Error: ${request.exaError}</p>
+                <p style="font-size: 14px;">Please click the extension icon to set your API key.</p>
+            </div>
+        `
+    }
     else if (request.searchSelected){
         // executed on selection of extension from contextmenu
 
