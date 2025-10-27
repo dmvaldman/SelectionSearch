@@ -8,7 +8,7 @@ const numExaResults = 5
 
 const contextMenuItem = {
     id: "SearchSelect",
-    title: "Exa Search",
+    title: "Search Select",
     contexts: ["selection"]
 }
 
