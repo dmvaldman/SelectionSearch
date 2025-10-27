@@ -5,7 +5,7 @@ const API_KEY_STORAGE_KEY = 'exa_api_key'
 
 const contextMenuItem = {
     id: "SearchSelect",
-    title: "Exa Search",
+    title: "Search Selection",
     contexts: ["selection"]
 }
 

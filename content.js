@@ -199,8 +199,16 @@ function createCarouselEl(linkItem, quotes, images){
 
     const updateCarousel = () => {
         carouselContent.style.transform = `translateX(-${currentItemIndex * 100}%)`;
-        prevButton.disabled = currentItemIndex === 0;
-        nextButton.disabled = currentItemIndex === totalItems - 1;
+        if (currentItemIndex === 0) {
+            prevButton.classList.add('hidden');
+        } else {
+            prevButton.classList.remove('hidden');
+        }
+        if (currentItemIndex === totalItems - 1) {
+            nextButton.classList.add('hidden');
+        } else {
+            nextButton.classList.remove('hidden');
+        }
     };
 
     prevButton.addEventListener('click', () => {

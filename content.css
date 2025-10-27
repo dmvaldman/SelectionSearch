@@ -115,12 +115,10 @@
     color: white;
     background: none;
     border: none;
-    font-size: 22px;
+    font-size: 26px;
     cursor: pointer;
     float: right;
     line-height: 32px;
-    margin: 4px;
-    line-height: 24px;
     width: 24px;
     height: 24px;
     text-align: center;
@@ -200,12 +198,9 @@
     text-align: center;
 }
 
-/* disabled button styling */
-.ss .carousel-button:disabled {
-    background-color: #eee;
-    color: #9c9c9c;
-    border: 1px solid #9c9c9c;
-    cursor: default;
+/* hidden button styling */
+.ss .carousel-button.hidden {
+    display: none;
 }
 
 /* flush left position absolute */
@@ -222,8 +217,8 @@
     position: absolute;
     right: 0;
     bottom: 0;
-    width: 15px;
-    height: 15px;
+    width: 13px;
+    height: 13px;
     background-color: #ccc;
     cursor: se-resize;
     z-index: 1;
@@ -233,7 +228,7 @@
     font-size: 12px;
     font-weight: bold;
     color: black;
-    line-height: 15px;
+    line-height: 13px;
     border: 1px solid #aaa;
 }
 
