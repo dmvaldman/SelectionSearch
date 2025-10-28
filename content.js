@@ -34,6 +34,8 @@ function createLinkEl(link){
     const linkTitle = document.createElement('a');
     linkTitle.classList.add('link-title');
     linkTitle.href = link.url;
+    linkTitle.target = '_blank';
+    linkTitle.rel = 'noopener noreferrer';
     linkTitle.textContent = link.title;
 
     // put the URL domain next to it in a span
@@ -59,12 +61,6 @@ function createLinkEl(link){
     const carouselContent = document.createElement('div');
     carouselContent.classList.add('carousel-content');
     carouselContainer.appendChild(carouselContent);
-
-    // score for debugging purposes
-    // const linkScore = document.createElement('span');
-    // linkScore.classList.add('link-score');
-    // linkScore.textContent = link.score;
-    // linkItem.appendChild(linkScore);
 
     return linkItem
 }
@@ -164,7 +160,7 @@ function createLinkContainerEl(currEl){
 }
 
 function createCarouselEl(linkItem, quotes, images){
-    if (!quotes || quotes.length == 0) return
+    if (!quotes || !Array.isArray(quotes) || quotes.length === 0) return
 
     const carouselContainer = linkItem.querySelector('.carousel-container');
     const carouselContent = carouselContainer.querySelector('.carousel-content');
@@ -193,7 +189,6 @@ function createCarouselEl(linkItem, quotes, images){
 
     let currentItemIndex = 0;
     const totalItems = quotes.length;
-    // const totalItems = quotes.length + images.length;
 
     const updateCarousel = () => {
         carouselContent.style.transform = `translateX(-${currentItemIndex * 100}%)`;
@@ -252,9 +247,6 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
         // executed on response from Exa
         const links = request.exaResponse.results
 
-        // display cost
-        // console.log('Exa API Cost: $' + request.exaResponse.costDollars.total)
-
         const loadEl = linkContainerEl.querySelector('.loading')
         const linkList = linkContainerEl.querySelector('.link-list')
 
@@ -272,7 +264,7 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
                 linkList.appendChild(linkItem);
 
                 // load content in parallel
-                const highlights = link.summary.snippets
+                const highlights = link.summary?.snippets || []
                 const images = []
 
                 createCarouselEl(linkItem, highlights, images)
@@ -285,9 +277,11 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
         const linkList = linkContainerEl.querySelector('.link-list')
 
         loadEl.remove()
+        // Escape HTML to prevent XSS
+        const escapedError = request.exaError.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
         linkList.innerHTML = `
             <div style="text-align: center; padding: 20px; color: red;">
-                <p style="font-weight: bold; margin-bottom: 10px;">Error: ${request.exaError}</p>
+                <p style="font-weight: bold; margin-bottom: 10px;">Error: ${escapedError}</p>
                 <p style="font-size: 14px;">Please click the extension icon to set your API key.</p>
             </div>
         `

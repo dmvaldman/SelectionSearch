@@ -73,10 +73,7 @@ async function saveApiKey() {
     const key = apiKeyInput.value.trim();
 
     if (!key) {
-        return;
-    }
-
-    if (key.length < 10) {
+        alert('Please enter an API key');
         return;
     }
 
@@ -86,6 +83,7 @@ async function saveApiKey() {
         showKeyDisplay();
     } catch (error) {
         console.error('Error saving API key:', error);
+        alert('Failed to save API key. Please try again.');
     }
 }
 

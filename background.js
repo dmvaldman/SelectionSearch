@@ -23,9 +23,6 @@ async function fetchExa(query, numResults=10){
         throw new Error('No API key found. Please set your Exa API key by clicking the extension icon.');
     }
 
-    // const prompt = "Excerpt: " + query + "\n\n Some great articles illustrating this:"
-    // const prompt = query
-
     const payload = {
       "query": query,
       "type": "neural",
@@ -63,11 +60,27 @@ async function fetchExa(query, numResults=10){
       };
 
     const result = await fetch('https://api.exa.ai/search', options)
+
+    if (!result.ok) {
+        throw new Error(`Exa API error: ${result.status} ${result.statusText}`);
+    }
+
     const json = await result.json()
-    // json parse the result[i].summary and replace
-    json.results.forEach(result => {
-        result.summary = JSON.parse(result.summary);
-    });
+
+    // Parse summary field safely
+    if (json.results && Array.isArray(json.results)) {
+        json.results.forEach(result => {
+            if (result.summary) {
+                try {
+                    result.summary = JSON.parse(result.summary);
+                } catch (e) {
+                    console.error('Error parsing summary:', e);
+                    result.summary = { snippets: [] };
+                }
+            }
+        });
+    }
+
     return json
 }
 
