@@ -12,6 +12,7 @@
         "css": ["content.css"]
     }],
     "permissions": ["storage", "activeTab", "contextMenus"],
+    "host_permissions": ["https://api.exa.ai/*"],
     "action": {
         "default_popup": "popup.html",
         "default_icon": {
