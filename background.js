@@ -23,20 +23,31 @@ async function fetchExa(query, numResults=10){
         throw new Error('No API key found. Please set your Exa API key by clicking the extension icon.');
     }
 
-    const prompt = "Excerpt: " + query + "\n\n Some great articles illustrating this:"
+    // const prompt = "Excerpt: " + query + "\n\n Some great articles illustrating this:"
+    // const prompt = query
 
     const payload = {
-        query: prompt,
-        numResults: numResults,
-        useQueryExpansion: true,
-        contents: {
-        text: {
-            maxCharacters: 500,
-            includeHtmlTags: false
-        },
-        highlights: {
-            numSentences: 3,
-            highlightsPerUrl: 3
+      "query": query,
+      "type": "neural",
+      "contents": {
+        "summary": {
+          "query": "Show the most relevant (direct quote) text snippets related to the user's query.",
+          "schema": {
+            "description": "Array of (direct quote) text snippets",
+            "type": "object",
+            "required": ["snippets"],
+            "additionalProperties": false,
+            "properties": {
+              "snippets": {
+                "type": "array",
+                "description": "Collection of 1-3 direct quote text snippets most relevant to the query. Each snippet should be 1-4 sentences.",
+                "items": {
+                  "type": "string",
+                  "description": "Text content of the snippet. 1-4 sentences, max 100 words."
+                }
+              }
+            }
+          }
         }
       }
     }
@@ -53,6 +64,10 @@ async function fetchExa(query, numResults=10){
 
     const result = await fetch('https://api.exa.ai/search', options)
     const json = await result.json()
+    // json parse the result[i].summary and replace
+    json.results.forEach(result => {
+        result.summary = JSON.parse(result.summary);
+    });
     return json
 }
 

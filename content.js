@@ -22,8 +22,6 @@ function iso2date(isoDate) {
     return formattedDate;
 }
 
-// DOM element constructors
-
 function createLinkEl(link){
     const linkItem = document.createElement('div');
     linkItem.classList.add('link-item');
@@ -109,20 +107,20 @@ function createLinkContainerEl(currEl){
     }
 
     function moveTooltip(e){
-        const dx = e.clientX - mousePosition.x
-        const dy = e.clientY - mousePosition.y
+        const dx = e.pageX - mousePosition.x
+        const dy = e.pageY - mousePosition.y
         const left = parseInt(window.getComputedStyle(linkContainerEl).left)
         const top = parseInt(window.getComputedStyle(linkContainerEl).top)
         linkContainerEl.style.left = `${left + dx}px`
         linkContainerEl.style.top = `${top + dy}px`
-        mousePosition.x = e.clientX
-        mousePosition.y = e.clientY
+        mousePosition.x = e.pageX
+        mousePosition.y = e.pageY
     }
 
     // make topbar draggable
     topBar.addEventListener('mousedown', function(e){
-        mousePosition.x = e.clientX
-        mousePosition.y = e.clientY
+        mousePosition.x = e.pageX
+        mousePosition.y = e.pageY
         document.addEventListener('mousemove', moveTooltip)
     })
 
@@ -166,7 +164,7 @@ function createLinkContainerEl(currEl){
 }
 
 function createCarouselEl(linkItem, quotes, images){
-    if (quotes.length == 0) return
+    if (!quotes || quotes.length == 0) return
 
     const carouselContainer = linkItem.querySelector('.carousel-container');
     const carouselContent = carouselContainer.querySelector('.carousel-content');
@@ -254,6 +252,9 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
         // executed on response from Exa
         const links = request.exaResponse.results
 
+        // display cost
+        // console.log('Exa API Cost: $' + request.exaResponse.costDollars.total)
+
         const loadEl = linkContainerEl.querySelector('.loading')
         const linkList = linkContainerEl.querySelector('.link-list')
 
@@ -271,8 +272,7 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
                 linkList.appendChild(linkItem);
 
                 // load content in parallel
-                const textContentSummary = link['text']
-                const highlights = link['highlights']
+                const highlights = link.summary.snippets
                 const images = []
 
                 createCarouselEl(linkItem, highlights, images)
@@ -299,9 +299,9 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
         linkContainerEl = createLinkContainerEl(currEl)
 
         // position tooltip below of the current element with some margin
-        let margin = 30
-        linkContainerEl.style.top = (window.scrollY + clientY + margin) + "px";
-        linkContainerEl.style.left = (clientX + margin) + "px";
+        let margin = 100
+        linkContainerEl.style.top = (window.scrollY + clientY - margin) + "px";
+        linkContainerEl.style.left = (window.scrollX + clientX - margin) + "px";
         loadEl = loadAnimation(linkContainerEl)
 
         document.body.prepend(linkContainerEl);
