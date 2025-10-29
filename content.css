@@ -114,7 +114,7 @@
 
 .ss .close-tooltip {
     position: relative;
-    color: white;
+    color: #ccc;
     background: none;
     border: none;
     font-size: 26px;
@@ -184,21 +184,29 @@
 }
 
 .ss .carousel-button {
-    background-color: white;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 26px;
     position: absolute;
     top: 50%;
     transform: translateY(-50%);
     z-index: 2;
-    color: black;
+    color: #777;
     padding: 0px;
     height: 24px;
     width: 16px;
     line-height: 24px;
     text-align: center;
-    border: 1px solid black;
-    box-sizing: border-box;
+    border: none;
+}
+
+.ss .carousel-button:hover {
+    color: #000;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.ss .carousel-button:active {
+    color: #000;
+    transform: translateY(-50%);
 }
 
 /* hidden button styling */

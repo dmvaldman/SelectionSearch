@@ -292,12 +292,36 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
         // create tooltip container
         linkContainerEl = createLinkContainerEl(currEl)
 
-        // position tooltip below of the current element with some margin
-        let margin = 100
-        linkContainerEl.style.top = (window.scrollY + clientY - margin) + "px";
-        linkContainerEl.style.left = (window.scrollX + clientX - margin) + "px";
-        loadEl = loadAnimation(linkContainerEl)
+        // Temporarily position off-screen to get computed dimensions
+        linkContainerEl.style.visibility = 'hidden';
+        linkContainerEl.style.position = 'absolute';
+        linkContainerEl.style.top = '-9999px';
+        linkContainerEl.style.left = '-9999px';
 
+        // Add to DOM to get computed dimensions
         document.body.prepend(linkContainerEl);
+
+        // Force layout calculation by accessing offsetWidth/offsetHeight
+        const modalWidth = linkContainerEl.offsetWidth;
+        const modalHeight = linkContainerEl.offsetHeight;
+
+        // position tooltip below of the current element with some margin
+        let margin = 50
+
+        // Calculate initial position
+        let left = window.scrollX + clientX - margin;
+        let top = window.scrollY + clientY - margin;
+
+        // Ensure modal stays within viewport bounds
+        // Clamp left: not negative, and right edge doesn't exceed viewport
+        left = Math.max(0, Math.min(left, window.scrollX + window.innerWidth - modalWidth));
+        // Clamp top: not negative, and bottom edge doesn't exceed viewport
+        top = Math.max(0, Math.min(top, window.scrollY + window.innerHeight - modalHeight));
+
+        // Set final position and make visible
+        linkContainerEl.style.top = top + "px";
+        linkContainerEl.style.left = left + "px";
+        linkContainerEl.style.visibility = 'visible';
+        loadEl = loadAnimation(linkContainerEl)
     }
 })
