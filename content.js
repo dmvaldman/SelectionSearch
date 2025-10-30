@@ -125,6 +125,12 @@ function createLinkContainerEl(currEl){
     })
 
     function closeTooltip() {
+        // Clean up resize listeners if still active
+        if (isResizing) {
+            isResizing = false;
+            document.removeEventListener("mousemove", handleResizeMove);
+            document.removeEventListener("mouseup", handleResizeUp);
+        }
         linkContainerEl.remove();
     }
 
@@ -134,26 +140,39 @@ function createLinkContainerEl(currEl){
     let isResizing = false;
     let initialWidth, initialHeight, initialMouseX, initialMouseY;
 
+    function handleResizeMove(e) {
+        if (!isResizing) return;
+
+        const newWidth = initialWidth + (e.pageX - initialMouseX);
+        const newHeight = initialHeight + (e.pageY - initialMouseY);
+
+        // Enforce minimum size
+        const minWidth = 300;
+        const minHeight = 200;
+
+        linkContainerEl.style.width = Math.max(minWidth, newWidth) + "px";
+        linkContainerEl.style.height = Math.max(minHeight, newHeight) + "px";
+    }
+
+    function handleResizeUp() {
+        if (isResizing) {
+            isResizing = false;
+            document.removeEventListener("mousemove", handleResizeMove);
+            document.removeEventListener("mouseup", handleResizeUp);
+        }
+    }
+
     resizeHandle.addEventListener("mousedown", (e) => {
+        e.preventDefault(); // Prevent text selection
         isResizing = true;
         initialWidth = linkContainerEl.offsetWidth;
         initialHeight = linkContainerEl.offsetHeight;
-        initialMouseX = e.clientX;
-        initialMouseY = e.clientY;
-    });
+        initialMouseX = e.pageX;
+        initialMouseY = e.pageY;
 
-    window.addEventListener("mousemove", (e) => {
-        if (!isResizing) return;
-
-        const newWidth = initialWidth + (e.clientX - initialMouseX);
-        const newHeight = initialHeight + (e.clientY - initialMouseY);
-
-        linkContainerEl.style.width = newWidth + "px";
-        linkContainerEl.style.height = newHeight + "px";
-    });
-
-    window.addEventListener("mouseup", () => {
-        isResizing = false;
+        // Attach to document level for better tracking
+        document.addEventListener("mousemove", handleResizeMove);
+        document.addEventListener("mouseup", handleResizeUp);
     });
 
     return linkContainerEl
