@@ -1,5 +1,3 @@
-const EXA_SCORE_THRESHOLD = 0.16
-
 let currEl = null
 let clientX = 0
 let clientY = 0
@@ -249,7 +247,6 @@ function loadAnimation(el){
 }
 
 function isValidLink(link){
-    if (link.score < EXA_SCORE_THRESHOLD) return false
     if (!link.url || !link.title) return false
 
     // make sure url is not from same domain
