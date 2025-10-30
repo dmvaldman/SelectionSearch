@@ -82,6 +82,14 @@ function createLinkContainerEl(currEl){
     resizeHandle.textContent = '↘'
     resizeHandle.classList.add('resize-handle')
 
+    // Set resize handle size to match scrollbar width
+    const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+    if (scrollbarWidth > 0) {
+        resizeHandle.style.width = scrollbarWidth + 'px';
+        resizeHandle.style.height = scrollbarWidth + 'px';
+        resizeHandle.style.fontSize = (scrollbarWidth - 2) + 'px';
+    }
+
     const closeEl = document.createElement('button')
     closeEl.classList.add('close-tooltip')
     closeEl.textContent = '×'

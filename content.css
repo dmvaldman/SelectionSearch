@@ -1,3 +1,17 @@
+.ss * {
+    all: unset;
+    display: revert;
+    box-sizing: border-box;
+}
+
+.ss a {
+    cursor: pointer;
+}
+
+.ss button {
+    cursor: pointer;
+}
+
 .ss {
     font-family: system-ui, Helvetica, sans-serif;
     position: absolute;
@@ -17,7 +31,6 @@
     font-size: 14px;
     font-weight: normal;
     line-height: 1.4;
-    box-sizing: border-box;
 }
 
 .ss .tooltip-wrapper {
@@ -122,7 +135,7 @@
     color: #ccc;
     background: none;
     border: none;
-    font-size: 26px;
+    font-size: 24px;
     cursor: pointer;
     width: 32px;
     height: 32px;
@@ -131,7 +144,6 @@
     justify-content: center;
     padding: 0;
     margin: 0;
-    margin-right: 4px;
 }
 
 .ss .close-tooltip:focus {
@@ -235,8 +247,8 @@
     position: absolute;
     right: 0;
     bottom: 0;
-    width: 13px;
-    height: 13px;
+    width: 15px;
+    height: 15px;
     background-color: #ccc;
     cursor: se-resize;
     z-index: 1;
