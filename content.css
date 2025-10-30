@@ -110,6 +110,11 @@
     background-color: #555;
     cursor: move;
     color: white;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 0;
+    margin: 0;
 }
 
 .ss .close-tooltip {
@@ -119,12 +124,14 @@
     border: none;
     font-size: 26px;
     cursor: pointer;
-    float: right;
-    line-height: 32px;
     width: 32px;
     height: 32px;
-    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     padding: 0;
+    margin: 0;
+    margin-right: 4px;
 }
 
 .ss .close-tooltip:focus {

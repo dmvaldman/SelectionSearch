@@ -9,7 +9,13 @@ const contextMenuItem = {
     contexts: ["selection"]
 }
 
-chrome.contextMenus.create(contextMenuItem);
+// Create context menu item, handling duplicates if it already exists
+chrome.contextMenus.create(contextMenuItem, () => {
+    if (chrome.runtime.lastError) {
+        // Menu item already exists, which is fine
+        console.log('Context menu already exists:', chrome.runtime.lastError.message);
+    }
+});
 
 async function getApiKey() {
     const result = await chrome.storage.local.get([API_KEY_STORAGE_KEY]);
@@ -84,28 +90,51 @@ async function fetchExa(query, numResults=10){
     return json
 }
 
+async function sendMessageToTab(tabId, message) {
+    try {
+        await chrome.tabs.sendMessage(tabId, message);
+    } catch (error) {
+        // Content script might not be loaded on this page (e.g., chrome:// pages, extensions)
+        if (error.message && error.message.includes('Receiving end does not exist')) {
+            console.log('Content script not available on this page');
+        } else {
+            console.error('Error sending message:', error);
+        }
+    }
+}
+
 chrome.contextMenus.onClicked.addListener(async function (clickData) {
     const selectedText = clickData.selectionText;
     if (clickData.menuItemId == "SearchSelect" && selectedText) {
       try {
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        const tabId = tabs[0].id
+        if (!tabs || tabs.length === 0) {
+            console.error("No active tab found");
+            return;
+        }
+        const tabId = tabs[0].id;
+
         // Send response to start the loading animation
-        chrome.tabs.sendMessage(tabId, { searchSelected: true, selectedText: selectedText });
+        await sendMessageToTab(tabId, { searchSelected: true, selectedText: selectedText });
 
         // Make a request to the local search server
         const response = await fetchExa(selectedText, numExaResults);
         // Send the response back to the content script
-        chrome.tabs.sendMessage(tabId, { exaResponse: response, selectedText: selectedText });
+        await sendMessageToTab(tabId, { exaResponse: response, selectedText: selectedText });
       } catch (error) {
         console.error("Error fetching from Exa:", error);
         // Send error message to content script
-        const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
-        const tabId = tabs[0].id;
-        chrome.tabs.sendMessage(tabId, {
-          exaError: error.message,
-          selectedText: selectedText
-        });
+        try {
+            const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
+            if (tabs && tabs.length > 0) {
+                await sendMessageToTab(tabs[0].id, {
+                    exaError: error.message,
+                    selectedText: selectedText
+                });
+            }
+        } catch (sendError) {
+            console.error("Error sending error message:", sendError);
+        }
       }
     }
   });
