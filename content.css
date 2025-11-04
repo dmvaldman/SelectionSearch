@@ -144,6 +144,7 @@
     justify-content: center;
     padding: 0;
     margin: 0;
+    top: -1px;
 }
 
 .ss .close-tooltip:focus {
@@ -216,6 +217,7 @@
     line-height: 24px;
     text-align: center;
     border: none;
+    background: none;
 }
 
 .ss .carousel-button:hover {

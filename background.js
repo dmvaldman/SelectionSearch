@@ -1,11 +1,8 @@
-// -----------------------------------------------------------------------------------
-
-const numExaResults = 5
 const API_KEY_STORAGE_KEY = 'exa_api_key'
 
 const contextMenuItem = {
-    id: "SearchSelect",
-    title: "Search Selection",
+    id: "BetweenTheLines",
+    title: "Read Between the Lines",
     contexts: ["selection"]
 }
 
@@ -22,37 +19,47 @@ async function getApiKey() {
     return result[API_KEY_STORAGE_KEY];
 }
 
-async function fetchExa(query, numResults=10){
+async function fetchExa(query){
     const apikey_exa = await getApiKey();
 
     if (!apikey_exa) {
         throw new Error('No API key found. Please set your Exa API key by clicking the extension icon.');
     }
 
-    const payload = {
-      "query": query,
-      "type": "neural",
-      "contents": {
-        "summary": {
-          "query": "Show the most relevant (direct quote) text snippets related to the user's query.",
-          "schema": {
-            "description": "Array of (direct quote) text snippets",
-            "type": "object",
-            "required": ["snippets"],
-            "additionalProperties": false,
-            "properties": {
-              "snippets": {
-                "type": "array",
-                "description": "Collection of 1-3 direct quote text snippets most relevant to the query. Each snippet should be 1-4 sentences.",
-                "items": {
-                  "type": "string",
-                  "description": "Text content of the snippet. 1-4 sentences, max 100 words."
-                }
+    const contents = {
+      "summary": {
+        "query": "Select 0-3 verbatim quotes that reflect the article's main points. Avoid low information-content text. Return an empty array if no relevant quotes are found or if the web content is boilerplate.",
+        "schema": {
+          "type": "object",
+          "required": ["snippets"],
+          "additionalProperties": false,
+          "properties": {
+            "snippets": {
+              "type": "array",
+              "description": "Array of 0-3 verbatim quotes.",
+              "items": {
+                "type": "string",
+                "description": "A quote. 1-4 sentences, max 100 words."
               }
             }
           }
         }
       }
+    }
+
+    // Old API. Still functional but seems unmaintained.
+    // const contents = {
+    //     "highlights": {
+    //       "numSentences": 3,
+    //       "highlightsPerUrl": 3,
+    //       "query": query
+    //     }
+    //   }
+
+    const payload = {
+      "query": query,
+      "type": "neural",
+      "contents": contents
     }
 
     const options = {
@@ -86,7 +93,6 @@ async function fetchExa(query, numResults=10){
             }
         });
     }
-
     return json
 }
 
@@ -105,7 +111,7 @@ async function sendMessageToTab(tabId, message) {
 
 chrome.contextMenus.onClicked.addListener(async function (clickData) {
     const selectedText = clickData.selectionText;
-    if (clickData.menuItemId == "SearchSelect" && selectedText) {
+    if (clickData.menuItemId == "BetweenTheLines" && selectedText) {
       try {
         const tabs = await chrome.tabs.query({ active: true, currentWindow: true });
         if (!tabs || tabs.length === 0) {
@@ -115,10 +121,10 @@ chrome.contextMenus.onClicked.addListener(async function (clickData) {
         const tabId = tabs[0].id;
 
         // Send response to start the loading animation
-        await sendMessageToTab(tabId, { searchSelected: true, selectedText: selectedText });
+        await sendMessageToTab(tabId, { selectedText: selectedText });
 
         // Make a request to the local search server
-        const response = await fetchExa(selectedText, numExaResults);
+        const response = await fetchExa(selectedText);
         // Send the response back to the content script
         await sendMessageToTab(tabId, { exaResponse: response, selectedText: selectedText });
       } catch (error) {

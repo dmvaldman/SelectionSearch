@@ -1,10 +1,10 @@
-# Privacy Policy for Selection Search
+# Privacy Policy for Between the Lines
 
 **Last Updated:** December 2024
 
 ## Overview
 
-Selection Search ("we", "our", or "the Extension") is committed to protecting your privacy. This Privacy Policy explains how we handle your data when you use our Chrome extension.
+Between the Lines ("we", "our", or "the Extension") is committed to protecting your privacy. This Privacy Policy explains how we handle your data when you use our Chrome extension.
 
 ## Data Collection
 

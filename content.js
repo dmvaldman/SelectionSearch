@@ -271,6 +271,8 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
         // executed on response from Exa
         const links = request.exaResponse.results
 
+        // debugger;
+
         const loadEl = linkContainerEl.querySelector('.loading')
         const linkList = linkContainerEl.querySelector('.link-list')
 
@@ -288,8 +290,22 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
                 linkList.appendChild(linkItem);
 
                 // load content in parallel
-                const highlights = link.summary?.snippets || []
-                const images = []
+                let highlights = []
+                if (link.summary){
+                    highlights = link.summary.snippets
+                }
+                else if (link.highlights && link.highlights.length > 0){
+                    highlights = link.highlights
+                }
+                else if (link.highlights && link.highlights.summary){
+                    highlights = [link.highlights.summary]
+                }
+
+                let images = []
+                if (link.image){
+                    // console.log(link.image)
+                    images = [link.image]
+                }
 
                 createCarouselEl(linkItem, highlights, images)
             }
@@ -310,7 +326,7 @@ chrome.runtime.onMessage.addListener(async function(request, sender, sendRespons
             </div>
         `
     }
-    else if (request.searchSelected){
+    else if (request.selectedText){
         // executed on selection of extension from contextmenu
 
         // create tooltip container
